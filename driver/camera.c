@@ -238,6 +238,15 @@ static esp_err_t camera_fb_init(size_t count)
         }
         memset(_fb2, 0, sizeof(camera_fb_int_t));
         _fb2->size = s_state->fb_size;
+#if CONFIG_PREFER_PSRAM
+        _fb2->buf = (uint8_t*) heap_caps_calloc(_fb2->size, 1, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+        if(!_fb2->buf) {
+            ESP_LOGI(TAG, "Allocating %d KB frame buffer in OnBoard RAM", s_state->fb_size/1024);
+            _fb2->buf = (uint8_t*) calloc(_fb2->size, 1);
+        } else {
+            ESP_LOGI(TAG, "Allocating %d KB frame buffer in PSRAM", s_state->fb_size/1024);
+        }
+#else
         _fb2->buf = (uint8_t*) calloc(_fb2->size, 1);
         if(!_fb2->buf) {
             ESP_LOGI(TAG, "Allocating %d KB frame buffer in PSRAM", s_state->fb_size/1024);
@@ -245,6 +254,7 @@ static esp_err_t camera_fb_init(size_t count)
         } else {
             ESP_LOGI(TAG, "Allocating %d KB frame buffer in OnBoard RAM", s_state->fb_size/1024);
         }
+#endif
         if(!_fb2->buf) {
             free(_fb2);
             ESP_LOGE(TAG, "Allocating %d KB frame buffer Failed", s_state->fb_size/1024);

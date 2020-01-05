@@ -43,4 +43,10 @@ choice CAMERA_TASK_PINNED_TO_CORE
 
 endchoice
     
+config PREFER_PSRAM
+    bool "Prefer use PSRAM for frame buffer"
+    default n
+    help
+        Enable this option to try allocating memory in PSRAM first
+
 endmenu
